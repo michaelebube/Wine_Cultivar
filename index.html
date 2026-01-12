@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wine Cultivar Prediction</title>
+    <style>
+      :root{
+        --accent:#0b6e6e; /* teal accent - not purple */
+        --muted:#6b6b6b;
+        --bg:#ffffff;
+        --surface:#fbfbfb;
+        --border:#e6e6e6;
+      }
+      html,body{height:100%;margin:0}
+      body { font-family: Inter, Arial, sans-serif; max-width:880px; margin:2rem auto; background:linear-gradient(180deg,#ffffff 0%, #f7fbfb 100%); color:#222; }
+      h1{color:var(--accent);margin-bottom:0.25rem}
+      form{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:8px;box-shadow:0 6px 18px rgba(11,110,110,0.06)}
+      label{display:block;margin-top:0.5rem;font-weight:600;color:var(--muted)}
+      input{width:100%;padding:8px;border:1px solid #dcdcdc;border-radius:6px;margin-top:6px;box-sizing:border-box}
+      button{margin-top:12px;padding:10px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer}
+      button:hover{opacity:0.95}
+      #result{margin-top:12px;padding:12px;border-radius:8px;border:1px dashed var(--border);background:#fff}
+      pre{background:#f6f6f6;padding:12px;border-radius:6px}
+      ul{margin:0;padding-left:1.15rem}
+      footer{margin-top:18px;padding:12px 0;text-align:center;color:var(--muted);border-top:1px solid var(--border);font-size:0.95rem}
+      @media(max-width:520px){body{margin:1rem}form{padding:12px}}
+    </style>
+  </head>
+  <body>
+    <h1>Wine Cultivar Prediction</h1>
+    <form id="frm">
+      <!-- Inputs match CSV column names (features order comes from model metadata) -->
+      <div id="inputs">
+      </div>
+      <button type="submit">Predict</button>
+    </form>
+
+    <h2>Result</h2>
+    <div id="result">No prediction yet.</div>
+
+    <script>
+      // default feature list in case metadata is not available locally
+      const defaultFeatures = [
+        'Alcohol','Malic acid','Ash','Alcalinity of ash','Magnesium','Total Phenols',
+        'Flavanoids','Nonflavanoid phenols','Proanthocyanins','Color intensity','Hue','OD280/OD315 of diluted wines','Proline'
+      ];
+
+      const inputsDiv = document.getElementById('inputs');
+      const features = defaultFeatures;
+      features.forEach(f => {
+        const id = f.replace(/\s+/g, '_');
+        const label = document.createElement('label');
+        label.textContent = f;
+        const input = document.createElement('input');
+        input.name = f;
+        input.id = id;
+        input.type = 'number';
+        input.step = 'any';
+        input.required = true;
+        inputsDiv.appendChild(label);
+        inputsDiv.appendChild(input);
+      });
+
+      document.getElementById('frm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const data = {};
+        features.forEach(f => { data[f] = form.elements[f].value; });
+
+        const res = await fetch('/predict', {
+          method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        if (json.error) {
+          document.getElementById('result').textContent = 'Error: ' + json.error;
+          return;
+        }
+        let out = `<strong>Predicted:</strong> ${json.predicted_name} (label ${json.predicted_label})<br/><br/>`;
+        out += '<strong>Probabilities:</strong><br/><ul>';
+        for (const [k,v] of Object.entries(json.probabilities)) {
+          out += `<li>${k}: ${(v*100).toFixed(1)}%</li>`;
+        }
+        out += '</ul>';
+        document.getElementById('result').innerHTML = out;
+      });
+    </script>
+    <footer>Built by Michael Ebube | 2026</footer>
+  </body>
+</html>

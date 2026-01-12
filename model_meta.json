@@ -1,0 +1,23 @@
+{
+  "features": [
+    "Unnamed: 0",
+    "Alcohol",
+    "Malic acid",
+    "Ash",
+    "Alcalinity of ash",
+    "Magnesium",
+    "Total Phenols",
+    "Flavanoids",
+    "Nonflavanoid phenols",
+    "Proanthocyanins",
+    "Color intensity",
+    "Hue",
+    "OD280/OD315 of diluted wines",
+    "Proline"
+  ],
+  "class_names": {
+    "1": "Cultivar 1",
+    "2": "Cultivar 2",
+    "3": "Cultivar 3"
+  }
+}
