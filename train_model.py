@@ -1,3 +1,5 @@
+# Google Colab script to train a RandomForestClassifier on the wine dataset
+
 import pandas as pd
 import json
 import joblib
