@@ -1,0 +1,18 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Flask
+instance/
+
+# ML models
+*.joblib
+*.pkl
+
+# VS Code
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
