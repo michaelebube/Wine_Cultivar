@@ -1,56 +1,41 @@
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
-import joblib
 import json
+import joblib
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
 
+CSV_PATH = "wine.csv"
+MODEL_PATH = "model.joblib"
+META_PATH = "model_meta.json"
+TARGET_COL = "Cultivars"
 
-def load_data(path="wine.csv"):
-    df = pd.read_csv(path)
-    # ensure target column exists
-    if "Cultivars" not in df.columns:
-        raise ValueError("Expected column 'Cultivars' in dataset")
-    X = df.drop(columns=["Cultivars"])
-    # drop unnamed index column if present
-    X = X.loc[:, ~X.columns.str.contains("^Unnamed")]
-    y = df["Cultivars"].astype(int)
-    return X, y
+df = pd.read_csv(CSV_PATH)
+df.columns = df.columns.str.strip()  # IMPORTANT
 
+X = df.drop(columns=[TARGET_COL])
+y = df[TARGET_COL].astype(int)
 
-def train_and_save(
-    path="wine.csv", model_out="model.joblib", meta_out="model_meta.json"
-):
-    X, y = load_data(path)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
 
-    clf = RandomForestClassifier(n_estimators=200, random_state=42)
-    clf.fit(X_train, y_train)
+clf = RandomForestClassifier(n_estimators=200, random_state=42, n_jobs=-1)
 
-    preds = clf.predict(X_test)
-    acc = accuracy_score(y_test, preds)
-    print(f"Test accuracy: {acc:.4f}")
-    print("Classification report:")
-    print(classification_report(y_test, preds))
-    print("Confusion matrix:")
-    print(confusion_matrix(y_test, preds))
+clf.fit(X_train, y_train)
 
-    # Save model and metadata
-    joblib.dump(clf, model_out)
-    meta = {
-        "features": list(X.columns),
-        "classes": [int(c) for c in clf.classes_.tolist()],
-        "class_names": {
-            str(int(c)): f"Cultivar {int(c)}" for c in clf.classes_.tolist()
-        },
-    }
-    with open(meta_out, "w") as f:
-        json.dump(meta, f)
+y_pred = clf.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
 
-    print(f"Saved model to {model_out} and metadata to {meta_out}")
+joblib.dump(clf, MODEL_PATH)
 
+meta = {
+    "features": list(X.columns),
+    "class_names": {"1": "Cultivar 1", "2": "Cultivar 2", "3": "Cultivar 3"},
+}
 
-if __name__ == "__main__":
-    train_and_save()
+with open(META_PATH, "w") as f:
+    json.dump(meta, f, indent=2)
+
+print("Saved model and metadata successfully.")
