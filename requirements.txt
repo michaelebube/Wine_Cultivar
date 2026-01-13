@@ -2,6 +2,5 @@ pandas==2.1.4
 scikit-learn==1.5.0
 flask==3.0.0
 joblib==1.4.0
-numpy
-matplotlib
-seaborn
+numpy==2.0.2
+
