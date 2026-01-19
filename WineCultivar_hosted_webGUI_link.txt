@@ -1,0 +1,6 @@
+Name: Ebube Michael Ifeanyichukwu 
+Matric Number: 22CG031850
+Machine Learning Algorithm Used: Random Forest Classifier 
+Model persistence method used: Joblib
+Live URL of the hosted application: https://wine-cultivar-classifier.onrender.com/ 
+GitHub repository link: https://github.com/michaelebube/Wine_Cultivar 
